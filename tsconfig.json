@@ -6,6 +6,6 @@
     "rootDir": "./src", // This is where your TypeScript source code is located
     "strict": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["*.ts", "*.js"],
   "exclude": ["node_modules"]
 }
