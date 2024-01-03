@@ -1,0 +1,7 @@
+[build]
+  functions = "functions"  # The directory where your serverless functions are located
+  command = "npm run build"  # You can customize this based on your project's build script
+  publish = "public"  # Assuming your static files are in a 'public' directory
+
+[[plugins]]
+  package = "netlify-plugin-cache"  # Optional: use Netlify cache plugin to speed up builds
