@@ -1,0 +1,2 @@
+npm install express body-parser express-validator mongoose multer bcryptjs jsonwebtoken --save
+
