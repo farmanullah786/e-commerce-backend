@@ -1,8 +1,8 @@
 // createSuperuser.js
 
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const User = require('./models/user'); // Replace with the actual path
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const User = require("./models/user"); // Replace with the actual path
 
 const dbUrl = "mongodb://127.0.0.1:27017/ecommerse";
 
@@ -13,25 +13,26 @@ async function createSuperuser() {
       useUnifiedTopology: true,
     });
 
-    const existingSuperuser = await User.findOne({ name: 'admin' });
+    const existingSuperuser = await User.findOne({ email: "admin@admin.com" });
 
     if (existingSuperuser) {
-      console.log('Superuser already exists.');
+      console.log("Superuser already exists.");
       return;
     }
 
     const superuser = new User({
-      name: 'admin',
-      email: 'admin@admin.com',
-      password: await bcrypt.hash('admin_password', 12),
+      name: "Malak Farman Khan",
+      email: "admin@admin.com",
+      password: await bcrypt.hash("admin", 12),
+      is_staff: true,
       // Add other necessary fields
     });
 
     await superuser.save();
 
-    console.log('Superuser created successfully.');
+    console.log("Superuser created successfully.");
   } catch (error) {
-    console.error('Error creating superuser:', error);
+    console.error("Error creating superuser:", error);
   } finally {
     mongoose.disconnect();
   }

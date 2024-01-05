@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const User = require("../models/user");
 const Product = require("../models/product");
 const Cart = require("../models/cart");
 const { validationResult } = require("express-validator");
@@ -31,6 +32,7 @@ exports.postProduct = (req, res, next) => {
   const title = req.body.title;
   const price = req.body.price;
   const description = req.body.description;
+  let productData;
   const product = new Product({
     title: title,
     price: price,
@@ -39,11 +41,39 @@ exports.postProduct = (req, res, next) => {
   });
   return product
     .save()
-    .then((product) =>
-      res
-        .status(201)
-        .json({ message: "Product added successfully!", product: product })
-    )
+    .then((product) => {
+      if (!product) {
+        const error = new Error("Product added failed!");
+        error.statusCode = 422;
+        throw error;
+      }
+      productData = product;
+      return User.find();
+    })
+    .then((users) => {
+      return users.map((user) => {
+        if (!user.is_staff) {
+          user.notification = [
+            ...user.notification,
+            productData._id.toString(),
+          ];
+        }
+        return user.save();
+      });
+    })
+    .then((user) => {
+      if (!user) {
+        Product.findByIdAndDelete(productData._id);
+        res.status(400).json({
+          message: "Product added failed!",
+          product: productData,
+        });
+      }
+      res.status(200).json({
+        message: "Product added successfully!",
+        product: productData,
+      });
+    })
     .catch((err) => {
       const error = new Error(err.message ? err.message : "Server Error");
       error.statusCode = err.statusCode ? err.statusCode : 500;

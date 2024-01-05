@@ -80,6 +80,8 @@ exports.deleteCart = (req, res, next) => {
   const _id = req.body._id;
   const userId = req.body.userId;
 
+  console.log(_id,userId)
+
   Cart.findOne({
     _id: _id,
     userId: userId,

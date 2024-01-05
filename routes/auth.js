@@ -41,7 +41,7 @@ router.post(
   [...emailValidation(), ...validateField("password")],
   authController.signInUser
 );
-router.get("/login-user/:userId", authenticateToken, authController.getUser);
+router.get("/login-user", authenticateToken, authController.getUser);
 
 router.put(
   "/update-user",
@@ -50,12 +50,12 @@ router.put(
     ...validateField("name"),
     ...emailValidation(),
     body("email")
-      .trim()
-      .custom(async (value, { req }) => {
-        const user = req.user;
-
-        try {
-          const existingUser = await User.findOne({ email: value });
+    .trim()
+    .custom(async (value, { req }) => {
+      const user = req.user;
+      
+      try {
+        const existingUser = await User.findOne({ email: value });
           if (
             (existingUser && existingUser.email === user.email) ||
             !existingUser
@@ -87,5 +87,13 @@ router.post(
   "/reset-password",
   [...validateField("password"), ...confirmPasswordValidation()],
   authController.resetPassword
+);
+
+router.get("/notifications", authenticateToken, authController.getNotifications);
+
+router.delete(
+  "/delete-notification/:notificationId",
+  authenticateToken,
+  authController.deleteNotification
 );
 module.exports = router;

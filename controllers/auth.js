@@ -84,6 +84,7 @@ exports.signInUser = (req, res, next) => {
           email: loadedUser.email,
           name: loadedUser.name,
           image: loadedUser.image,
+          is_staff: loadedUser.is_staff,
         },
         "malakfarmankhan786",
         { expiresIn: "1h" }
@@ -104,9 +105,10 @@ exports.signInUser = (req, res, next) => {
     });
 };
 exports.getUser = (req, res, next) => {
-  const userId = req.params.userId;
+  const userId = req.user._id;
 
   User.findOne({ _id: userId })
+    .populate("notification")
     .then((user) => {
       if (user === null) {
         const error = new Error("Not authenticated!");
@@ -120,6 +122,7 @@ exports.getUser = (req, res, next) => {
           name: user.name,
           email: user.email,
           image: user.image,
+          notification: user.notification,
         },
       });
     })
@@ -278,6 +281,7 @@ exports.forgotPassword = (req, res, next) => {
       });
   });
 };
+
 exports.resetPassword = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -313,6 +317,69 @@ exports.resetPassword = (req, res, next) => {
       res.status(201).json({
         message: "Password changed successfully!",
         userId: user._id.toString(),
+      });
+    })
+    .catch((err) => {
+      const error = new Error(err?.message ? err?.message : "Server Error");
+      error.statusCode = err.statusCode ? err.statusCode : 500;
+      next(error);
+    });
+};
+
+exports.getNotifications = (req, res, next) => {
+  const userId = req.user._id;
+
+  User.findOne({ _id: userId })
+    .populate("notification")
+    .then((user) => {
+      if (user === null) {
+        const error = new Error("Not authenticated!");
+        error.statusCode = 401;
+        throw error;
+      }
+      res.status(200).json({
+        message: "Fetched notifications successfully!",
+        notifications: user.notification,
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+exports.deleteNotification = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    errors.array().forEach((errorObj) => {
+      const error = new Error(errorObj.msg.message);
+      error.statusCode = errorObj.msg.statusCode;
+      throw error;
+    });
+  }
+
+  const userId = req.user._id;
+  const notificationId = req.params.notificationId;
+
+  User.findOneAndUpdate(
+    { _id: userId },
+    { $pull: { notification: notificationId } },
+    { new: true }
+  )
+    .then((user) => {
+      if (!user) {
+        const error = new Error("You have unauthorized!");
+        error.statusCode = 401;
+        throw error;
+      }
+
+      // If you need to perform additional actions after deleting the notification, you can do it here.
+
+      res.status(200).json({
+        message: "Notification deleted successfully",
+        user: user,
       });
     })
     .catch((err) => {

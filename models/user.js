@@ -16,10 +16,19 @@ const userSchema = new Schema({
   },
   image: {
     type: String,
-    default: "/default/profile-2.jpeg", // Default image path
   },
+  notification: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "Product",
+    },
+  ],
   resetToken: String,
   resetTokenExpiration: Date,
+  is_staff: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);
